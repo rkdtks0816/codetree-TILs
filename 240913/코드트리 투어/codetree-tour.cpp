@@ -104,7 +104,6 @@ void changeStartingPoint(int newStart) {
 		int newCost = dist[p.dest];
 		p.cost = newCost;
 		newQueue.push({ p.id, p.revenue, p.dest, newCost });
-		availableProducts[p.id] = true;  // 팔 수 없는 상품도 true로 설정
 	}
 
 	products = newQueue;  // 새로운 큐로 대체
