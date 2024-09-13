@@ -75,10 +75,8 @@ void addProduct(int id, int revenue, int dest) {
 
     // 상품을 목록에 추가 (팔 수 없더라도 추가)
     allProducts.push_back({id, revenue, dest, cost});
-    if (cost != INT_MAX && cost <= revenue) {
-        products.push({id, revenue, dest, cost});
-        availableProducts[id] = true;
-    }
+    products.push({id, revenue, dest, cost}); // 팔 수 없는 상품도 우선순위 큐에 추가
+    availableProducts[id] = (cost != INT_MAX && cost <= revenue);
 }
 
 // 여행 상품 취소 함수
@@ -109,12 +107,9 @@ void changeStartingPoint(int newStart) {
 
     for (auto& p : allProducts) {
         int newCost = dist[p.dest];
-        if (newCost != INT_MAX && newCost <= p.revenue) {
-            newQueue.push({p.id, p.revenue, p.dest, newCost});
-            availableProducts[p.id] = true;
-        } else {
-            availableProducts[p.id] = false; // 팔 수 없는 상품은 제외
-        }
+        p.cost = newCost;
+        newQueue.push({p.id, p.revenue, p.dest, newCost}); // 팔 수 없어도 추가
+        availableProducts[p.id] = (newCost != INT_MAX && newCost <= p.revenue); // 팔 수 있는지 여부 갱신
     }
 
     products = newQueue; // 새로운 큐로 대체
