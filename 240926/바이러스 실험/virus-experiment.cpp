@@ -47,6 +47,8 @@ int addYB[MAX_N][MAX_N];
 void cycle() {
 	// 새로운 바이러스 큐 생성
 	priority_queue<Virus, vector<Virus>, cmp> tempViruses;
+	// 죽은 바이러스로 인해 추가될 양분
+	int death[MAX_N][MAX_N] = { 0 };
 	// 기존 바이러스 모두 양분 섭취
 	while (!viruses.empty()) {
 		int de = 1;
@@ -63,7 +65,7 @@ void cycle() {
 		// 섭취할 수 없을 때
 		else {
 			// 죽음
-			YBMap[nowVirus.row][nowVirus.col] += nowVirus.age / 2;
+			death[nowVirus.row][nowVirus.col] += nowVirus.age / 2;
 		}
 
 	}
@@ -91,8 +93,10 @@ void cycle() {
 	}
 	// 주어진 양분 추가
 	for (int r = 0; r < n; r++)
-		for (int c = 0; c < n; c++)
+		for (int c = 0; c < n; c++) {
+			YBMap[r][c] += death[r][c];
 			YBMap[r][c] += addYB[r][c];
+		}
 }
 
 int main() {
