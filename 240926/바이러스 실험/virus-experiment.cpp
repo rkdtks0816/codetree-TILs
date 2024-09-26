@@ -30,7 +30,7 @@ struct Virus {
 	int age;
 	// 연산자 오버로딩 나이 어린 순
 	bool operator< (const Virus& right) const {
-		return age > right.age;
+		return age < right.age;
 	}
 };
 
