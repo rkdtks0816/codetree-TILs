@@ -49,6 +49,7 @@ void cycle() {
 	priority_queue<Virus, vector<Virus>, cmp> tempViruses;
 	// 기존 바이러스 모두 양분 섭취
 	while (!viruses.empty()) {
+		int de = 1;
 		// 준비 - 우선 순위 큐에서 바이러스 하나씩 꺼내기
 		Virus nowVirus = viruses.top();
 		viruses.pop();
@@ -64,6 +65,7 @@ void cycle() {
 			// 죽음
 			YBMap[nowVirus.row][nowVirus.col] += nowVirus.age / 2;
 		}
+
 	}
 	// 번식
 	// 살아 남은 5의 배수 나이 바이러스  번식
@@ -75,7 +77,7 @@ void cycle() {
 		viruses.push(liveVirus);
 		// 조건 - 5의 배수의 나이
 		// 번식 하지 않는다면 그대로 바이러스 큐에 추가
-		if (liveVirus.age % 5 != 0) continue;
+		if (liveVirus.age % 5 != 0 && liveVirus.age != 0) continue;
 		// 번식 한다면 8칸에 나이가 1인 바이러스 추가
 		int dr[] = { -1, -1, -1, 0, 0, 1, 1, 1 };
 		int dc[] = { -1, 0, 1, -1, 1, -1, 0, 1 };
