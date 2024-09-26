@@ -29,13 +29,13 @@ struct Virus {
 	int col;
 	int age;
 	// 연산자 오버로딩 나이 어린 순
-	bool operator< (const Virus& right) const {
-		return age < right.age;
+	bool operator> (const Virus& right) const {
+		return age > right.age;
 	}
 };
 
 // 바이러스 정보 우선 순위 큐 나이 어린 순
-priority_queue<Virus> viruses;
+priority_queue<Virus, vector<Virus>, greater<Virus>> viruses;
 
 // 마지막 추가되는 양분의 양
 int addYB[MAX_N][MAX_N];
@@ -43,7 +43,7 @@ int addYB[MAX_N][MAX_N];
 // 사이클
 void cycle() {
 	// 새로운 바이러스 큐 생성
-	priority_queue<Virus> tempViruses;
+	priority_queue<Virus, vector<Virus>, greater<Virus>> tempViruses;
 	// 기존 바이러스 모두 양분 섭취
 	while (!viruses.empty()) {
 		// 준비 - 우선 순위 큐에서 바이러스 하나씩 꺼내기
