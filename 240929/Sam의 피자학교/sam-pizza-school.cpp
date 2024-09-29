@@ -170,7 +170,8 @@ int main() {
 	while (true) {
 		pair<int, int> maxMin = findMaxMin(dough);
 		if (maxMin.first - maxMin.second <= k) break;
-		// 밀가루 추가addflour(dough);
+		// 밀가루 추가
+		addflour(dough);
 		// 도우 말기
 		dough = rollDough(dough);
 		// 도우 접기
