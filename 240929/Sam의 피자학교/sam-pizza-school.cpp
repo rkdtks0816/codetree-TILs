@@ -42,7 +42,7 @@ pair<int, int> findRollSize(int targetSize) {
 		int nc = rollSize.second;
 		if (rollSize.first == rollSize.second) nr += 1;
 		else nc += 1;
-		if (nr * nc >= targetSize) break;
+		if (nr * nc > targetSize) break;
 		rollSize = { nr, nc };
 	}
 	return rollSize;
@@ -112,6 +112,7 @@ vector<int> pressRoll(pair<int, int> rollSize, vector<vector<int>> roll) {
 		}
 	}
 	// 롤 펴기
+	int de = 1;
 	vector<int> newDough;
 	for (int col = 0; col < rollSize.second; col++) {
 		for (int row = rollSize.first - 1; row >= 0; row--) {
