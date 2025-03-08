@@ -315,9 +315,6 @@ void dfs(void) {
 				q[qr].space_num = nn;
 				q[qr].dist = nd;
 				qr++;
-				if (qr > MAX_NUM) {
-					int de = 1;
-				}
 			}
 		}
 	}
