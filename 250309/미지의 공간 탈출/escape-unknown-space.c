@@ -265,6 +265,9 @@ int checkEvent(int space_num, int dist) {
 		int max_E = dist / now.v;
 		for (int ei = 0; ei < max_E; ei++) {
 			int next_space_num = total_grid[now_space_num][wall_d[now.d]];
+			if (next_space_num == -1) {
+				continue;
+			}
 			// 벽인지 확인
 			if (total_grid[next_space_num][4] == 1 || next_space_num == grid_exit) {
 				break;
