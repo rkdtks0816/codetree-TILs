@@ -193,6 +193,9 @@ void deleteName (void) {
   scanf("%10s", name);
   int delete_index = -1;
   for (int i = 0; i < MAX_INSERT; i++) {
+    if (isEmpty[i] == 0) {
+      continue;
+    }
     if (isSame(tables[i].name, name)) {
       delete_index = i;
       break;
