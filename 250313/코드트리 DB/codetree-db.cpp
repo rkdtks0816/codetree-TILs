@@ -18,7 +18,7 @@ void copyStr(char *left, const char *right, const int left_size);
 /* 세그먼트 트리 */
 int segtree[4 * MAX_INSERT];
 void buildSegmentTree(int node, int start, int end);
-int querySum(int node, int start, int end, int left, int right);
+long long querySum(int node, int start, int end, int left, int right);
 int queryRank(int node, int start, int end, int k);
 void updateSegmentTree(int node, int start, int end, int idx, int value);
 
@@ -43,6 +43,8 @@ void initTable(void);
 	 * 실패 0: 둘 중 하나라도 이미 존재하는 name, value
 	  * 최대 100,000
 	   */
+
+int compare_value(const void *a, const void *b);
 void insertData(void);
 /*
  * 3. delete (delete name)
@@ -154,7 +156,7 @@ void buildSegmentTree(const int node, const int start, const int end) {
 	}
 }
 /*----------------------------------------------*/
-int querySum(int node, int start, int end, int left, int right) {
+long long querySum(int node, int start, int end, int left, int right) {
 	if (right < tables[start].value || tables[end].value < left) {
 		return 0;
 	}
@@ -163,7 +165,8 @@ int querySum(int node, int start, int end, int left, int right) {
 	}
 	else {
 		int mid = (start + end) / 2;
-		return querySum(2 * node + 1, start, mid, left, right) + querySum(2 * node + 2, mid + 1, end, left, right);
+		return querySum(2 * node + 1, start, mid, left, right) +
+			querySum(2 * node + 2, mid + 1, end, left, right);
 	}
 }
 /*----------------------------------------------*/
@@ -171,7 +174,7 @@ int queryRank(int node, int start, int end, int k) {
 	if (start == end) return start;
 
 	int mid = (start + end) / 2;
-	int left_count = mid - start + 1;
+	int left_count = segtree[2 * node + 1];
 
 	if (left_count >= k) {
 		return queryRank(2 * node + 1, start, mid, k);
@@ -185,34 +188,42 @@ void initTable(void) {
 	table_size = 0;
 }
 /*----------------------------------------------*/
+int compare_value(const void *a, const void *b) {
+	return ((Table *)a)->value - ((Table *)b)->value;
+}
+/*----------------------------------------------*/
 void insertData(void) {
 	char name[MAX_NAME];
 	int value;
 	scanf("%10s %d", name, &value);
-	int insert_index = 0;
-	for (int i = 0; i < table_size; i++) {
-		if (
-			isSame(tables[i].name, name) ||
-			tables[i].value == value
-			) {
-			printf("0\n");
-			return;
-		}
+
+	/* 이진 탐색으로 중복 검사 */
+	Table key = { "", value };
+	Table *found = bsearch(&key, tables, table_size, sizeof(Table), compare_value);
+
+	if (found) { /* 이미 존재하는 값 */
+		printf("0\n");
+		return;
 	}
-	int i = table_size - 1;
-	while (i >= 0 && tables[i].value > value) {
-		tables[i + 1] = tables[i];
-		i--;
+
+	/* 이진 탐색으로 삽입 위치 결정 */
+	int left = 0, right = table_size;
+	while (left < right) {
+		int mid = (left + right) / 2;
+		if (tables[mid].value < value)
+			left = mid + 1;
+		else
+			right = mid;
 	}
-	Table *nowTable = &tables[i + 1];
-	copyStr(nowTable->name, name, sizeof(nowTable->name));
-	nowTable->value = value;
+
+	/* 배열 이동을 최적화하여 삽입 */
+	memmove(&tables[left + 1], &tables[left], (table_size - left) * sizeof(Table));
+	copyStr(tables[left].name, name, MAX_NAME);
+	tables[left].value = value;
 	table_size++;
 
-	if (table_size != 0) {
-		buildSegmentTree(0, 0, table_size - 1);
-	}
-
+	/* 세그먼트 트리 업데이트 */
+	buildSegmentTree(0, 0, table_size - 1);
 	printf("1\n");
 }
 /*----------------------------------------------*/
@@ -220,6 +231,7 @@ void deleteName(void) {
 	char name[MAX_NAME];
 	scanf("%10s", name);
 
+	/* 이름으로 이진 탐색 (순차 탐색 불가, 직접 탐색 필요) */
 	int index = -1;
 	for (int i = 0; i < table_size; i++) {
 		if (isSame(tables[i].name, name)) {
@@ -235,17 +247,12 @@ void deleteName(void) {
 
 	int deleted_value = tables[index].value;
 
-	// 데이터 삭제 (배열 유지)
-	for (int i = index; i < table_size - 1; i++) {
-		tables[i] = tables[i + 1];
-	}
+	/* 데이터 이동 최적화 */
+	memmove(&tables[index], &tables[index + 1], (table_size - index - 1) * sizeof(Table));
 	table_size--;
 
-	// 세그먼트 트리 업데이트
-	if (table_size != 0) {
-		buildSegmentTree(0, 0, table_size - 1);
-	}
-
+	/* 세그먼트 트리 업데이트 */
+	buildSegmentTree(0, 0, table_size - 1);
 	printf("%d\n", deleted_value);
 }
 /*----------------------------------------------*/
@@ -269,8 +276,8 @@ void sumK(void) {
 		printf("0\n");
 		return;
 	}
-	int sum = querySum(0, 0, table_size - 1, 0, k);
-	printf("%d\n", sum);
+	long long sum = querySum(0, 0, table_size - 1, 0, k);
+	printf("%lld\n", sum);
 }
 /*----------------------------------------------*/
 
