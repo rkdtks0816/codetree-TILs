@@ -1,7 +1,7 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include <stdio.h>
 
-#define MAX_NAME 20 /* 10 */
+#define MAX_NAME 11 /* 10 */
 #define MAX_VALUE 1000000010 /* 1000000000 */
 #define MAX_Q 300010 /* 300000 */
 #define MAX_INIT 60 /* 50 */
@@ -16,7 +16,7 @@ int isSame(const char *left, const char *right);
 void copyStr(char *left, const char *right, const int left_size);
 
 /* 세그먼트 트리 */
-int segtree[4 * MAX_INSERT];
+int segtree[2 * MAX_INSERT];
 void buildSegmentTree(int node, int start, int end);
 int querySum(int node, int start, int end, int left, int right);
 int queryRank(int node, int start, int end, int k);
