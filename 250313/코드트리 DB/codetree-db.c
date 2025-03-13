@@ -6,33 +6,29 @@
 #define MAX_Q 300010 /* 300000 */
 #define MAX_INIT 60 /* 50 */
 #define MAX_INSERT 100010 /* 100000 */
-/* 쿼리의 수 */
+/* 쿼리*/
 int Q;
-
-/* 쿼리의 수를 입력 받는 함수 */
 void inputQ(void);
-
-/* 쿼리를 실행하는 함수 */
 void runQuery(void);
 
-/* 문자열 비교 */
-int isSame(const char left[], const char right[]);
+/* 문자열*/
+int isSame(const char *left, const char *right);
+void copyStr(char *left, const char *right, const int left_size);
 
-/* 문자열 복사 */
-void copyStr(const int table_index, const char str[]);
+/* 세그먼트 트리 */
+int segtree[4 * MAX_INSERT];
+void buildSegmentTree(int node, int start, int end);
+int querySum(int node, int start, int end, int left, int right);
+int queryRank(int node, int start, int end, int k);
+void updateSegmentTree(int node, int start, int end, int idx, int value);
 
-/* 테이블 구조체 */
-struct Table {
-	char name[MAX_NAME]; /* 이름: 10 */
-	int value; /* 값: 1,000,000,000(int)*/
-	struct Table *next;
-};
-/* 테이블: insert 최대 갯수 */
-struct Table tables[MAX_INSERT];
-/* 첫 번째 테이블*/
-struct Table *first_table;
-/* 다음 테이블 들어갈 인덱스 */
-int next_index;
+/* 테이블 */
+typedef struct {
+  char name[MAX_NAME]; /* 이름: 10 */
+  int value; /* 값: 1,000,000,000(int)*/
+} Table;
+Table tables[MAX_INSERT];
+int table_size;
 /*
  * 1. init (init)
  * 모든 데이터 삭제: isEmpty = 0
@@ -82,167 +78,189 @@ void sumK(void);
 
 int main(void) {
 
-	inputQ();
-	runQuery();
+  inputQ();
+  runQuery();
 
-	return 0;
+  return 0;
 }
 /*----------------------------------------------*/
 void inputQ(void) {
-	scanf("%d", &Q);
+  scanf("%d", &Q);
 }
 /*----------------------------------------------*/
 void runQuery(void) {
-	for (int qi = 0; qi < Q; qi++) {
-		char type_query[11];
-		scanf("%10s", type_query);
-		if (isSame("init", type_query)) {
-			initTable();
-		}
-		else if (isSame("insert", type_query)) {
-			insertData();
-		}
-		else if (isSame("delete", type_query)) {
-			deleteName();
-		}
-		else if (isSame("rank", type_query)) {
-			rankK();
-		}
-		else {
-			sumK();
-		}
-	}
+  for (int qi = 0; qi < Q; qi++) {
+    char type_query[11];
+    scanf("%10s", type_query);
+    if (isSame("init", type_query)) {
+      initTable();
+    }
+    else if (isSame("insert", type_query)) {
+      insertData();
+    }
+    else if (isSame("delete", type_query)) {
+      deleteName();
+    }
+    else if (isSame("rank", type_query)) {
+      rankK();
+    }
+    else {
+      sumK();
+    }
+  }
 }
 /*----------------------------------------------*/
 int isSame(const char *left, const char *right) {
-	int si = 0;
+  int si = 0;
 
-	while (left[si] != '\0' && right[si] != '\0') {
-		if (left[si] != right[si]) {
-			return 0;  /* 문자열이 다르면 0 반환 */
-		}
-		si++;
-	}
+  while (left[si] != '\0' && right[si] != '\0') {
+    if (left[si] != right[si]) {
+      return 0;  /* 문자열이 다르면 0 반환 */
+    }
+    si++;
+  }
 
-	/* 두 문자열의 길이가 동일하면 1 반환, 다르면 0 반환 */
-	return (left[si] == '\0' && right[si] == '\0') ? 1 : 0;
+  /* 두 문자열의 길이가 동일하면 1 반환, 다르면 0 반환 */
+  return (left[si] == '\0' && right[si] == '\0') ? 1 : 0;
 }
 /*----------------------------------------------*/
-void copyStr(const int table_index, const char *str) {
-	int i = 0;
-	while (str[i] != '\0') {
-		tables[table_index].name[i] = 0;
-		i++;
-	}
-	tables[table_index].name[i] = 0;
-	i = 0;
-	while (str[i] != '\0') {
-		tables[table_index].name[i] = str[i];
-		i++;
-	}
+void copyStr(char *left, const char *right, const int left_size) {
+    int i = 0;
+    
+    // right를 left에 복사 (최대 left_size - 1 만큼만 복사하여 널 종료 보장)
+    while (i < left_size - 1 && right[i] != '\0') {
+        left[i] = right[i];
+        i++;
+    }
+
+    // 널 문자 추가하여 문자열 종료 보장
+    left[i] = '\0';
+
+    // 기존 `left`의 남아 있는 부분을 `\0`으로 채움
+    while (i < left_size - 1) {
+        left[i++] = '\0';
+    }
+}
+/*----------------------------------------------*/
+void buildSegmentTree(const int node, const int start, const int end) {
+  if (start == end) {
+    segtree[node] = tables[start].value;
+  } else {
+    int mid = (start + end) / 2;
+    buildSegmentTree(2 * node + 1, start, mid);
+    buildSegmentTree(2 * node + 2, mid + 1, end);
+    segtree[node] = segtree[2 * node + 1] + segtree[2 * node + 2];
+  }
+}
+/*----------------------------------------------*/
+int querySum(int node, int start, int end, int left, int right) {
+  if (right < tables[start].value || tables[end].value < left) {
+    return 0;
+  } else if (left <= tables[start].value && tables[end].value <= right){
+    return segtree[node];
+  } else {
+    int mid = (start + end) / 2;
+    return querySum(2 * node + 1, start, mid, left, right) + querySum(2 * node + 2, mid + 1, end, left, right);
+  }
+}
+/*----------------------------------------------*/
+int queryRank(int node, int start, int end, int k) {
+    if (start == end) return start;
+
+    int mid = (start + end) / 2;
+    int left_count = mid - start + 1;
+
+    if (left_count >= k) {
+        return queryRank(2 * node + 1, start, mid, k);
+    } else {
+        return queryRank(2 * node + 2, mid + 1, end, k - left_count);
+    }
 }
 /*----------------------------------------------*/
 void initTable(void) {
-	first_table = NULL;
-	next_index = 0;
+  table_size = 0;
 }
 /*----------------------------------------------*/
 void insertData(void) {
-	char name[MAX_NAME];
-	int value;
-	scanf("%10s %d", name, &value);
-	struct Table *nowTable = first_table;
-	struct Table *preTable = NULL;
-	while (nowTable != NULL) {
-		if (isSame(nowTable->name, name)) {
-			printf("0\n");
-			return;
-		}
-		else if (nowTable->value == value) {
-			printf("0\n");
-			return;
-		}
-		else if (nowTable->value < value) {
-			preTable = nowTable;
-		}
-		nowTable = nowTable->next;
-	}
-	/* 순서에 맞게 삽입 */
-	copyStr(next_index, name);
-	tables[next_index].value = value;
-	if (first_table == NULL) {
-		tables[next_index].next = NULL;
-		first_table = &tables[next_index];
-	}
-	else if (preTable == NULL){
-		tables[next_index].next = first_table;
-		first_table = &tables[next_index];
-	}
-	else {
-		tables[next_index].next = preTable->next;
-		preTable->next = &tables[next_index];
-	}
-	next_index++;
-	printf("1\n");
+  char name[MAX_NAME];
+  int value;
+  scanf("%10s %d", name, &value);
+  int insert_index = 0;
+  for (int i = 0; i < table_size; i++) {
+    if (
+        isSame(tables[i].name, name) ||
+        tables[i].value == value
+        ) {
+          printf("0\n");
+          return;
+        }
+  }
+  int i = table_size - 1;
+  while(i >= 0 && tables[i].value > value) {
+    tables[i + 1] = tables[i];
+    i--;
+  }
+  Table *nowTable = &tables[i + 1];
+  copyStr(nowTable->name, name, sizeof(nowTable->name));
+  nowTable->value = value;
+  table_size++;
+  
+  buildSegmentTree(0, 0, table_size - 1);
+  
+  printf("1\n");
 }
 /*----------------------------------------------*/
 void deleteName(void) {
-	char name[MAX_NAME];
-	scanf("%10s", name);
-	struct Table *nowTable = first_table;
-	struct Table *preTable = NULL;
-	while (nowTable != NULL) {
-		if (isSame(nowTable->name, name)) {
-			break;
-		}
-		else {
-			preTable = nowTable;
-		}
-		nowTable = nowTable->next;
-	}
-	if (nowTable == NULL) {
-		printf("0\n");
-		return;
-	}
+  char name[MAX_NAME];
+  scanf("%10s", name);
+  
+  int index = -1;
+  for (int i = 0; i < table_size; i++) {
+      if (isSame(tables[i].name, name)) {
+          index = i;
+          break;
+      }
+  }
+  
+  if (index == -1) {
+      printf("0\n");
+      return;
+  }
 
-	if (preTable == NULL) {
-		first_table = nowTable->next;
-	}
-	else {
-		preTable->next = nowTable->next;
-	}
+  int deleted_value = tables[index].value;
+  
+  // 데이터 삭제 (배열 유지)
+  for (int i = index; i < table_size - 1; i++) {
+      tables[i] = tables[i + 1];
+  }
+  table_size--;
 
-	printf("%d\n", nowTable->value);
+  // 세그먼트 트리 업데이트
+  buildSegmentTree(0, 0, table_size - 1);
+  
+  printf("%d\n", deleted_value);
 }
 /*----------------------------------------------*/
 void rankK(void) {
-	int k;
-	scanf("%d", &k);
-	struct Table *nowTable = first_table;
-	int cnt = 1;
-	while (nowTable != NULL) {
-		if (cnt == k) {
-			printf("%s\n", nowTable->name);
-			return;
-		}
-		nowTable = nowTable->next;
-		cnt++;
-	}
-	printf("None\n");
+    int k;
+    scanf("%d", &k);
+
+    if (k > table_size) {
+        printf("None\n");
+        return;
+    }
+
+    int index = queryRank(0, 0, table_size - 1, k);
+    printf("%s\n", tables[index].name);
 }
 /*----------------------------------------------*/
 void sumK(void) {
-	int k;
-	scanf("%d", &k);
-	long long sum = 0;
-	struct Table *nowTable = first_table;
-	while (nowTable != NULL) {
-		if (nowTable->value <= k) {
-			sum += nowTable->value;
-		}
-		nowTable = nowTable->next;
-	}
-	printf("%lld\n", sum);
+    int k;
+    scanf("%d", &k);
+    
+    int sum = querySum(0, 0, table_size - 1, 0, k);
+    printf("%d\n", sum);
 }
 /*----------------------------------------------*/
+
 
