@@ -294,6 +294,10 @@ void simulate(int n, int k, Nodes_t acs, Nodes_t offices, int walls[][MAX_N][2])
     ac_mix(n, walls, ac_grid);
     ac_edge(n, ac_grid);
     ++time;
+    if (time > 100) {
+      time = -1;
+      break;
+    }
   }
   printf("%d", time);
 }
