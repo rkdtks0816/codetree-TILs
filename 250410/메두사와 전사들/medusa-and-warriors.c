@@ -346,7 +346,7 @@ int main(void){
     }
   }
   m_init(&m, grid);
-  if (grid[m.now.row][m.now.col] == MAX_N * MAX_N) {
+  if (m.path[m.now.row][m.now.col] == MAX_N * MAX_N) {
     printf("-1");
     return 0;
   }
