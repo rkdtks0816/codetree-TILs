@@ -200,9 +200,12 @@ void w_q_push(Queue_t *q, Position_t next, int di, Warriors_t *w, Queue_t *w_q){
   w->m_range[di][next.row][next.col] = 1;
   q_push(q, next);
 }
-void w_w_q_push(Queue_t *q, Position_t next, int di, Warriors_t *w){
+void w_w_q_push(Queue_t *q, Position_t next, int di, Warriors_t *w, int *w_count){
   if (check_range(next)){
     return;
+  }
+  if (w->warrios[next.row][next.col] > 0) {
+    *w_count -= w->warrios[next.row][next.col];
   }
   w->m_range[di][next.row][next.col] = 0;
   q_push(q, next);
@@ -233,24 +236,24 @@ void w_get_m_range(Medosa_t *m, Warriors_t *w){
         w_q_push(&q, next, di, w, &w_q);
       }
     }
-    if (w_max >= w_q.rear) {
-      continue;
-    }
-    w_max = w_q.rear;
-    w->m_direction = di;
+    int w_count = w_q.rear;
     while (w_q.front < w_q.rear){
       Position_t now = q_front_pop(&w_q);
       Position_t next;
       if (w_m_direction(di, m->now, now) > 0){
         next = w_m_left(di, now);
-        w_w_q_push(&w_q, next, di, w);
+        w_w_q_push(&w_q, next, di, w, &w_count);
       }
       else if (w_m_direction(di, m->now, now) < 0){
         next = w_m_right(di, now);
-        w_w_q_push(&w_q, next, di, w);
+        w_w_q_push(&w_q, next, di, w, &w_count);
       }
       next = w_m_center(di, now);
-      w_w_q_push(&w_q, next, di, w);
+      w_w_q_push(&w_q, next, di, w, &w_count);
+    }
+    if (w_max < w_count) {
+      w_max = w_count;
+      w->m_direction = di;
     }
   }
 }
