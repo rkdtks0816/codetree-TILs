@@ -290,7 +290,7 @@ void w_move (Warriors_t *w, Medosa_t *m, Answer_t *a) {
         }
         if ( i == 0 ) {
           if (nnr != -1 && w->m_range[w->m_direction][nnr][nc] != 1) {
-            ++a->sum;
+            a->sum += temp;
             if (m->now.row == nnr && m->now.col == nc){
               a->attack += temp;
               temp = 0;
@@ -298,7 +298,7 @@ void w_move (Warriors_t *w, Medosa_t *m, Answer_t *a) {
             nr = nnr;
           }
           else if (nnc != -1 && w->m_range[w->m_direction][nr][nnc] != 1) {
-            ++a->sum;
+            a->sum += temp;
             if (m->now.row == nr && m->now.col == nnc){
               a->attack += temp;
               temp = 0;
@@ -308,7 +308,7 @@ void w_move (Warriors_t *w, Medosa_t *m, Answer_t *a) {
         }
         else {
           if (nnc != -1 && w->m_range[w->m_direction][nr][nnc] != 1) {
-            ++a->sum;
+            a->sum += temp;
             if (m->now.row == nr && m->now.col == nnc){
               a->attack += temp;
               temp = 0;
@@ -316,7 +316,7 @@ void w_move (Warriors_t *w, Medosa_t *m, Answer_t *a) {
             nc = nnc;
           }
           else if (nnr != -1 && w->m_range[w->m_direction][nnr][nc] != 1) {
-            ++a->sum;
+            a->sum += temp;
             if (m->now.row == nnr && m->now.col == nc){
               a->attack += temp;
               temp = 0;
@@ -364,7 +364,6 @@ int main(void){
     w_get_m_range(&m, &w);
     w_move(&w, &m, &a);
     printf("%d %d %d\n", a.sum, a.stone, a.attack);
-    int de = 1;
     m_move(&m);
   }
   printf("0");
