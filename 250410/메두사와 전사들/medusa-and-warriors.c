@@ -155,128 +155,108 @@ void w_init(Warriors_t *w){
     ++w->warrios[row][col];
   }
 }
-void w_m_left(int di, Position_t now, Position_t m, Queue_t *q, Warriors_t *w, int *w_count){
-  Position_t side;
-  side.row = -1;
-  int level;
-  switch (di) {
-    case 0: {
-      level =  m.row - now.row;
-      if (m.col - level == now.col) {
-        side.row = now.row + cr[0];
-        side.col = now.col + cc[0];
-      }
-      break;
-    }
-    case 1: {
-      level = now.row - m.row;
-      if (m.col + level == now.col) {
-        side.row = now.row + cr[2];
-        side.col = now.col + cc[2];
-      }
-      break;
-    }
-    case 2: {
-      level = m.col - now.col;
-      if (m.row + level == now.row) {
-        side.row = now.row + cr[3];
-        side.col = now.col + cc[3];
-      }
-      break;
-    }
-    case 3: {
-      level = now.col - m.col;
-      if (m.row - level == now.row) {
-        side.row = now.row + cr[1];
-        side.col = now.col + cc[1];
-      }
-      break;
-    }
+int w_m_direction(int di, Position_t m, Position_t now){
+  if (di == 0) {
+    return m.col - now.col;
   }
-  if (side.row != -1 && !check_range(side)){
-    if (w->warrios[side.row][side.col] == 0) {
-      q_push(q, side);
-    }
-    else {
-      *w_count += w->warrios[side.row][side.col];
-    }
-    w->m_range[di][side.row][side.col] = 1;
+  else if (di == 1){
+    return now.col - m.col;
   }
+  else if (di == 2){
+    return now.row - m.row;
+  }
+  else if (di == 3){
+    return m.row - now.row;
+  }
+  return MAX_N;
 }
-void w_m_right(int di, Position_t now, Position_t m, Queue_t *q, Warriors_t *w, int *w_count){
-  Position_t side;
-  side.row = -1;
-  int level;
-  switch (di) {
-    case 0: {
-      level = m.row - now.row;
-      if (m.col + level == now.col) {
-        side.row = now.row + cr[1];
-        side.col = now.col + cc[1];
-      }
-      break;
-    }
-    case 1: {
-      level = now.row - m.row;
-      if (m.col - level == now.col) {
-        side.row = now.row + cr[3];
-        side.col = now.col + cc[3];
-      }
-      break;
-    }
-    case 2: {
-      level = m.col - now.col;
-      if (m.row - level == now.row) {
-        side.row = now.row + cr[0];
-        side.col = now.col + cc[0];
-      }
-      break;
-    }
-    case 3: {
-      level = now.col - m.col;
-      if (m.row + level == now.row) {
-        side.row = now.row + cr[2];
-        side.col = now.col + cc[2];
-      }
-      break;
-    }
+Position_t w_m_left(int di, Position_t m) {
+  int d_left[] = {0, 2, 3, 1};
+  Position_t new;
+  new.row = m.row + cr[d_left[di]];
+  new.col = m.col + cc[d_left[di]];
+  return new;
+}
+Position_t w_m_center(int di, Position_t m) {
+  Position_t new;
+  new.row = m.row + dr[di];
+  new.col = m.col + dc[di];
+  return new;
+}
+Position_t w_m_right(int di, Position_t m) {
+  int d_right[] = {1, 3, 0, 2};
+  Position_t new;
+  new.row = m.row + cr[d_right[di]];
+  new.col = m.col + cc[d_right[di]];
+  return new;
+}
+void w_q_push(Queue_t *q, Position_t next, int di, Warriors_t *w, Queue_t *w_q){
+  if (check_range(next)){
+    return;
   }
-  if (side.row != -1 && !check_range(side)){
-    if (w->warrios[side.row][side.col] == 0) {
-      q_push(q, side);
-    }
-    else {
-      *w_count += w->warrios[side.row][side.col];
-    }
-    w->m_range[di][side.row][side.col] = 1;
+  if (w->warrios[next.row][next.col] > 0) {
+    q_push(w_q, next);
   }
+  w->m_range[di][next.row][next.col] = 1;
+  q_push(q, next);
+}
+void w_w_q_push(Queue_t *q, Position_t next, int di, Warriors_t *w){
+  if (check_range(next)){
+    return;
+  }
+  w->m_range[di][next.row][next.col] = 0;
+  q_push(q, next);
 }
 void w_get_m_range(Medosa_t *m, Warriors_t *w){
   int w_max = 0;
   for (int di = 0; di < 4; ++di){
-    int w_count = 0;
     Queue_t q = q_init();
+    Queue_t w_q = q_init();
     q_push(&q, m->now);
     while (q.front < q.rear){
       Position_t now = q_front_pop(&q);
-      w_m_left(di, now, m->now, &q, w, &w_count);
-      w_m_right(di, now, m->now, &q, w, &w_count);
       Position_t next;
-      next.row = now.row + dr[di];
-      next.col = now.col + dc[di];
-      if (!check_range(next)){
-        if (w->warrios[next.row][next.col] == 0) {
-          q_push(&q, next);
-        }
-        else {
-          w_count += w->warrios[next.row][next.col];
-        }
-        w->m_range[di][next.row][next.col] = 1;
+      if (w_m_direction(di, m->now, now) > 0){
+        next = w_m_left(di, now);
+        w_q_push(&q, next, di, w, &w_q);
+      }
+      else if (w_m_direction(di, m->now, now) < 0){
+        next = w_m_right(di, now);
+        w_q_push(&q, next, di, w, &w_q);
+      }
+      else {
+        next = w_m_left(di, now);
+        w_q_push(&q, next, di, w, &w_q);
+        next = w_m_right(di, now);
+        w_q_push(&q, next, di, w, &w_q);
+        next = w_m_center(di, now);
+        w_q_push(&q, next, di, w, &w_q);
       }
     }
-    if (w_count > w_max) {
-      w_max = w_count;
-      w->m_direction = di;
+    if (w_max >= w_q.rear) {
+      continue;
+    }
+    w_max = w_q.rear;
+    w->m_direction = di;
+    while (w_q.front < w_q.rear){
+      Position_t now = q_front_pop(&w_q);
+      Position_t next;
+      if (w_m_direction(di, m->now, now) > 0){
+        next = w_m_left(di, now);
+        w_w_q_push(&w_q, next, di, w);
+        next = w_m_center(di, now);
+        w_w_q_push(&w_q, next, di, w);
+      }
+      else if (w_m_direction(di, m->now, now) < 0){
+        next = w_m_right(di, now);
+        w_w_q_push(&w_q, next, di, w);
+        next = w_m_center(di, now);
+        w_w_q_push(&w_q, next, di, w);
+      }
+      else {
+        next = w_m_center(di, now);
+        w_w_q_push(&w_q, next, di, w);
+      }
     }
   }
 }
@@ -284,10 +264,8 @@ void w_move (Warriors_t *w, Medosa_t *m, Answer_t *a) {
   int visited[MAX_N][MAX_N] = { 0 };
   for (int ri = 0; ri < n; ++ri) {
     for (int ci = 0; ci < n; ++ci) {
-      if (w->warrios[ri][ci] == 0){
-        continue;
-      }
-      if (w->warrios[ri][ci] == visited[ri][ci]) {
+      int temp = w->warrios[ri][ci] - visited[ri][ci];
+      if (temp == 0){
         continue;
       }
       if (m->now.row == ri && m->now.col == ci) {
@@ -295,12 +273,11 @@ void w_move (Warriors_t *w, Medosa_t *m, Answer_t *a) {
         continue;
       }
       if (w->m_range[w->m_direction][ri][ci] == 1){
-        a->stone += w->warrios[ri][ci];
+        a->stone += temp;
         continue;
       }
       int nr = ri;
       int nc = ci;
-      int temp = w->warrios[nr][nc] - visited[nr][nc];
       for (int i = 0; i < 2; ++i){
         int nnr = -1;
         int nnc = -1;
@@ -316,7 +293,6 @@ void w_move (Warriors_t *w, Medosa_t *m, Answer_t *a) {
         else if (nc < m->now.col) {
           nnc = nc + 1;
         }
-        temp = w->warrios[nr][nc] - visited[nr][nc];
         w->warrios[nr][nc] -= temp;
         if (nnr != -1 && w->m_range[w->m_direction][nnr][nc] != 1) {
           w->warrios[nnr][nc] += temp;
@@ -324,7 +300,6 @@ void w_move (Warriors_t *w, Medosa_t *m, Answer_t *a) {
           if (m->now.row == nnr && m->now.col == nc){
             a->attack += temp;
             w->warrios[nnr][nc] = 0;
-            temp = 0;
           }
           nr = nnr;
         }
@@ -334,12 +309,11 @@ void w_move (Warriors_t *w, Medosa_t *m, Answer_t *a) {
           if (m->now.row == nr && m->now.col == nnc){
             a->attack += temp;
             w->warrios[nr][nnc] = 0;
-            temp = 0;
           }
           nc = nnc;
         }
         else {
-          w->warrios[nr][nc] = temp;
+          w->warrios[nr][nc] += temp;
           break;
         }
       }
