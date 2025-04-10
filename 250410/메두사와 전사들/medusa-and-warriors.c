@@ -244,19 +244,13 @@ void w_get_m_range(Medosa_t *m, Warriors_t *w){
       if (w_m_direction(di, m->now, now) > 0){
         next = w_m_left(di, now);
         w_w_q_push(&w_q, next, di, w);
-        next = w_m_center(di, now);
-        w_w_q_push(&w_q, next, di, w);
       }
       else if (w_m_direction(di, m->now, now) < 0){
         next = w_m_right(di, now);
         w_w_q_push(&w_q, next, di, w);
-        next = w_m_center(di, now);
-        w_w_q_push(&w_q, next, di, w);
       }
-      else {
-        next = w_m_center(di, now);
-        w_w_q_push(&w_q, next, di, w);
-      }
+      next = w_m_center(di, now);
+      w_w_q_push(&w_q, next, di, w);
     }
   }
 }
@@ -276,6 +270,7 @@ void w_move (Warriors_t *w, Medosa_t *m, Answer_t *a) {
         a->stone += temp;
         continue;
       }
+      w->warrios[ri][ci] -= temp;
       int nr = ri;
       int nc = ci;
       for (int i = 0; i < 2; ++i){
@@ -293,30 +288,44 @@ void w_move (Warriors_t *w, Medosa_t *m, Answer_t *a) {
         else if (nc < m->now.col) {
           nnc = nc + 1;
         }
-        w->warrios[nr][nc] -= temp;
-        if (nnr != -1 && w->m_range[w->m_direction][nnr][nc] != 1) {
-          w->warrios[nnr][nc] += temp;
-          ++a->sum;
-          if (m->now.row == nnr && m->now.col == nc){
-            a->attack += temp;
-            w->warrios[nnr][nc] = 0;
+        if ( i == 0 ) {
+          if (nnr != -1 && w->m_range[w->m_direction][nnr][nc] != 1) {
+            ++a->sum;
+            if (m->now.row == nnr && m->now.col == nc){
+              a->attack += temp;
+              temp = 0;
+            }
+            nr = nnr;
           }
-          nr = nnr;
-        }
-        else if (nnc != -1 && w->m_range[w->m_direction][nr][nnc] != 1) {
-          w->warrios[nr][nnc] = temp;
-          ++a->sum;
-          if (m->now.row == nr && m->now.col == nnc){
-            a->attack += temp;
-            w->warrios[nr][nnc] = 0;
+          else if (nnc != -1 && w->m_range[w->m_direction][nr][nnc] != 1) {
+            ++a->sum;
+            if (m->now.row == nr && m->now.col == nnc){
+              a->attack += temp;
+              temp = 0;
+            }
+            nc = nnc;
           }
-          nc = nnc;
         }
         else {
-          w->warrios[nr][nc] += temp;
-          break;
+          if (nnc != -1 && w->m_range[w->m_direction][nr][nnc] != 1) {
+            ++a->sum;
+            if (m->now.row == nr && m->now.col == nnc){
+              a->attack += temp;
+              temp = 0;
+            }
+            nc = nnc;
+          }
+          else if (nnr != -1 && w->m_range[w->m_direction][nnr][nc] != 1) {
+            ++a->sum;
+            if (m->now.row == nnr && m->now.col == nc){
+              a->attack += temp;
+              temp = 0;
+            }
+            nr = nnr;
+          }
         }
       }
+      w->warrios[nr][nc] += temp;
       if (nr != ri || nc != ci) {
         visited[nr][nc] += temp;
       }
@@ -355,6 +364,7 @@ int main(void){
     w_get_m_range(&m, &w);
     w_move(&w, &m, &a);
     printf("%d %d %d\n", a.sum, a.stone, a.attack);
+    int de = 1;
     m_move(&m);
   }
   printf("0");
