@@ -168,7 +168,7 @@ int m_sight_up(void) {
 			}
 			me.sight[0][next.row][next.col] = 1;
 			if (wa.warriors[next.row][next.col] > 0) {
-				++w_count;
+				w_count += wa.warriors[next.row][next.col];
 				Position_t w_next;
 				int w_level = 1;
 				for (w_next.row = next.row - 1; w_next.row >= 0; --w_next.row) {
@@ -216,7 +216,7 @@ int m_sight_down(void) {
 			}
 			me.sight[1][next.row][next.col] = 1;
 			if (wa.warriors[next.row][next.col] > 0) {
-				++w_count;
+				w_count += wa.warriors[next.row][next.col];
 				Position_t w_next;
 				int w_level = 1;
 				for (w_next.row = next.row + 1; w_next.row < n; ++w_next.row) {
@@ -264,7 +264,7 @@ int m_sight_left(void) {
 			}
 			me.sight[2][next.row][next.col] = 1;
 			if (wa.warriors[next.row][next.col] > 0) {
-				++w_count;
+				w_count += wa.warriors[next.row][next.col];
 				Position_t w_next;
 				int w_level = 1;
 				for (w_next.col = next.col - 1; w_next.col >= 0; --w_next.col) {
@@ -312,7 +312,7 @@ int m_sight_right(void) {
 			}
 			me.sight[3][next.row][next.col] = 1;
 			if (wa.warriors[next.row][next.col] > 0) {
-				++w_count;
+				w_count += wa.warriors[next.row][next.col];
 				Position_t w_next;
 				int w_level = 1;
 				for (w_next.col = next.col + 1; w_next.col < n; ++w_next.col) {
@@ -531,4 +531,12 @@ int main(void) {
 0 0 1 0 1 #
 0 & 0 0 0 0
 0 0 0 0 1 1
+
+0 0 0 0 0 1 0
+0 0 0 0 0 0 1
+0 0 0 0 # 1 1
+0 0 0 2 0 1 0
+0 0 0 0 0 0 0
+0 0 0 0 0 0 0
+0 0 0 0 0 0 0
 */
