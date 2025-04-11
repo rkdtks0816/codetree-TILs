@@ -276,7 +276,7 @@ int m_sight_left(void) {
 							defence[w_next.row][w_next.col] = 1;
 						}
 					}
-					else if (next.col > center.col) {
+					else if (next.row > center.row) {
 						for (w_next.row = next.row + level; w_next.row >= next.row; --w_next.row) {
 							if (!in_range(w_next)) {
 								continue;
@@ -324,7 +324,7 @@ int m_sight_right(void) {
 							defence[w_next.row][w_next.col] = 1;
 						}
 					}
-					else if (next.col > center.col) {
+					else if (next.row > center.row) {
 						for (w_next.row = next.row + level; w_next.row >= next.row; --w_next.row) {
 							if (!in_range(w_next)) {
 								continue;
@@ -469,8 +469,10 @@ int main(void) {
 			c_arr_init(me.sight[di], 0);
 		}
 		m_sight();
+		int de = 1;
 		w_move();
 		printf("%d %d %d\n", a.move, a.stone, a.attack);
+		de = 1;
 		m_move();
 	}
 	printf("0");
