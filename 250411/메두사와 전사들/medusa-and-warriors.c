@@ -173,7 +173,7 @@ int m_sight_up(void) {
 				int w_level = 1;
 				for (w_next.row = next.row - 1; w_next.row >= 0; --w_next.row) {
 					if (next.col < center.col) {
-						for (w_next.col = next.col - level; w_next.col <= next.col; ++w_next.col) {
+						for (w_next.col = next.col - w_level; w_next.col <= next.col; ++w_next.col) {
 							if (!in_range(w_next)) {
 								continue;
 							}
@@ -181,7 +181,7 @@ int m_sight_up(void) {
 						}
 					}
 					else if (next.col > center.col) {
-						for (w_next.col = next.col + level; w_next.col >= next.col; --w_next.col) {
+						for (w_next.col = next.col + w_level; w_next.col >= next.col; --w_next.col) {
 							if (!in_range(w_next)) {
 								continue;
 							}
@@ -221,7 +221,7 @@ int m_sight_down(void) {
 				int w_level = 1;
 				for (w_next.row = next.row + 1; w_next.row < n; ++w_next.row) {
 					if (next.col < center.col) {
-						for (w_next.col = next.col - level; w_next.col <= next.col; ++w_next.col) {
+						for (w_next.col = next.col - w_level; w_next.col <= next.col; ++w_next.col) {
 							if(!in_range(w_next)) {
 								continue;
 							}
@@ -229,7 +229,7 @@ int m_sight_down(void) {
 						}
 					}
 					else if (next.col > center.col) {
-						for (w_next.col = next.col + level; w_next.col >= next.col; --w_next.col) {
+						for (w_next.col = next.col + w_level; w_next.col >= next.col; --w_next.col) {
 							if (!in_range(w_next)) {
 								continue;
 							}
@@ -269,7 +269,7 @@ int m_sight_left(void) {
 				int w_level = 1;
 				for (w_next.col = next.col - 1; w_next.col >= 0; --w_next.col) {
 					if (next.row < center.row) {
-						for (w_next.row = next.row - level; w_next.row <= next.row; ++w_next.row) {
+						for (w_next.row = next.row - w_level; w_next.row <= next.row; ++w_next.row) {
 							if (!in_range(w_next)) {
 								continue;
 							}
@@ -277,7 +277,7 @@ int m_sight_left(void) {
 						}
 					}
 					else if (next.row > center.row) {
-						for (w_next.row = next.row + level; w_next.row >= next.row; --w_next.row) {
+						for (w_next.row = next.row + w_level; w_next.row >= next.row; --w_next.row) {
 							if (!in_range(w_next)) {
 								continue;
 							}
@@ -317,7 +317,7 @@ int m_sight_right(void) {
 				int w_level = 1;
 				for (w_next.col = next.col + 1; w_next.col < n; ++w_next.col) {
 					if (next.row < center.row) {
-						for (w_next.row = next.row - level; w_next.row <= next.row; ++w_next.row) {
+						for (w_next.row = next.row - w_level; w_next.row <= next.row; ++w_next.row) {
 							if (!in_range(w_next)) {
 								continue;
 							}
@@ -325,7 +325,7 @@ int m_sight_right(void) {
 						}
 					}
 					else if (next.row > center.row) {
-						for (w_next.row = next.row + level; w_next.row >= next.row; --w_next.row) {
+						for (w_next.row = next.row + w_level; w_next.row >= next.row; --w_next.row) {
 							if (!in_range(w_next)) {
 								continue;
 							}
